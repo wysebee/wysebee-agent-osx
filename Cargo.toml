@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = ["crates/agent-core", "crates/agent-app"]
+
+# The app's version lives here and only here.
+[workspace.package]
+version = "0.2.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+base64 = "0.22"
+# Reading Local Folder files: the same versions as Wysebee Desktop's, which ran these tools.
+calamine = "0.37"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+pdf-extract = "0.12"
+quick-xml = "0.42"
+zip = { version = "9", default-features = false, features = ["deflate"] }
+rand = "0.8"
+regex = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+sha2 = "0.10"
+hex = "0.4"
+# The screen's picture (screen.rs): scaled and sent as a JPEG.
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "sync", "time", "io-util"] }
+tracing = "0.1"

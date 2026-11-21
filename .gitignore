@@ -1,0 +1,9 @@
+/target/
+.DS_Store
+.vscode/
+.idea/
+# The schemas tauri-build writes beside its config.
+/crates/agent-app/gen/
+
+# Internal notes, kept locally and out of the public repository.
+/CLAUDE.md

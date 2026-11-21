@@ -1,0 +1,33 @@
+[package]
+name = "agent-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Wysebee Agent for Mac, bar the window: the link to Wysebee Cloud, the approvals and the programs."
+
+[dependencies]
+base64.workspace = true
+calamine.workspace = true
+chrono.workspace = true
+pdf-extract.workspace = true
+quick-xml.workspace = true
+zip.workspace = true
+rand.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+hex.workspace = true
+image.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+# The link secret's home (secrets.rs).
+[target.'cfg(target_os = "macos")'.dependencies]
+security-framework = "3"
+
+[dev-dependencies]
+tempfile = "3"
+axum = { version = "0.8", default-features = false, features = ["json", "query", "tokio", "http1"] }
+tokio = { version = "1", features = ["full"] }

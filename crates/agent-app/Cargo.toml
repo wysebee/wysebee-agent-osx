@@ -1,0 +1,36 @@
+[package]
+name = "agent-app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Wysebee Agent for Mac's shell: a menu bar icon and one small window over agent-core."
+
+[[bin]]
+name = "wysebee-agent"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+agent-core = { path = "../agent-core" }
+tauri = { version = "2", features = ["tray-icon", "image-png", "macos-private-api"] }
+# Start at login, as a LaunchAgent.
+tauri-plugin-autostart = "2"
+# The native folder picker (Local folders), used from Rust only: no page permission.
+tauri-plugin-dialog = "2"
+dirs = "6"
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "std"] }
+
+[features]
+# Serve the embedded page as a production build does. A release build uses it;
+# `cargo run` works without it.
+custom-protocol = ["tauri/custom-protocol"]
+
+# Screen control (src/screen.rs): the display captured, the mouse and keyboard worked.
+[target."cfg(target_os = \"macos\")".dependencies]
+enigo = "0.6.1"
+xcap = "0.9.10"

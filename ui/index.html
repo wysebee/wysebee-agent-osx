@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wysebee Agent</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- The theme the person chose, before the first paint (theme.js), so a dark window never
+       flashes light. -->
+  <script src="theme.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Wysebee Agent</h1>
+      <p id="mac" class="sub"></p>
+    </div>
+    <!-- Paired: the agent this Mac belongs to, and whether the link is up. -->
+    <div id="agent-chip" class="agent-chip" hidden>
+      <div>
+        <div id="agent-label" class="agent-name"></div>
+        <div id="agent-handle" class="sub"></div>
+      </div>
+      <span id="connected" class="badge"></span>
+    </div>
+  </header>
+
+  <main>
+    <p id="error" class="banner error" role="alert" hidden></p>
+
+    <!-- Not paired: a name for the new agent. -->
+    <section id="unpaired" class="panel" hidden>
+      <p id="note" class="banner" hidden></p>
+      <p id="refusal" class="banner error" hidden></p>
+      <div class="card hero">
+        <h2 class="card-title">Pair this Mac</h2>
+        <p class="muted">Pair this Mac with Wysebee to let one agent run the programs you allow here and use the folders you pick. Pairing makes a new agent.</p>
+        <form id="pair-form">
+          <label for="agent-name">Name for the new agent</label>
+          <div class="row">
+            <input id="agent-name" type="text" maxlength="60" placeholder="Mac helper" autocomplete="off" spellcheck="false" required>
+            <button id="pair" type="submit" class="primary">Pair</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Waiting for the code to be typed in Wysebee. -->
+    <section id="waiting" class="panel" hidden>
+      <div class="card hero">
+        <p>Type this code in Wysebee, under <strong>Devices</strong>:</p>
+        <div class="code-row">
+          <p id="code" class="code" aria-live="polite"></p>
+          <button id="copy-code" type="button" class="icon-btn copy" aria-label="Copy the code" title="Copy the code">
+            <!-- Inline, not a data: URL: the window's CSP (default-src 'self') loads no data: image. -->
+            <svg class="icon-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg class="icon-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </button>
+        </div>
+        <p id="expires" class="muted center"></p>
+        <p class="muted center">The agent will be called <strong id="typed-name"></strong>.</p>
+        <div class="row center"><button id="cancel" type="button">Cancel</button></div>
+      </div>
+    </section>
+
+    <!-- Paired: its tabs. -->
+    <section id="paired" hidden>
+      <nav class="tabs" role="tablist" aria-label="Wysebee Agent">
+        <button id="tab-programs" type="button" role="tab" data-tab="programs">Programs <span id="waiting-count" class="count" hidden></span></button>
+        <button id="tab-folders" type="button" role="tab" data-tab="folders">Folders</button>
+        <button id="tab-settings" type="button" role="tab" data-tab="settings">Settings</button>
+      </nav>
+
+      <!-- Programs: the agent's programs and skills, to allow; shown when it has any. -->
+      <div id="panel-programs" class="panel" role="tabpanel" aria-labelledby="tab-programs" hidden>
+        <p id="paused-note" class="banner warn" hidden>Paused: nothing runs until you turn "Run programs on this Mac" back on in Settings.</p>
+        <div id="programs-block">
+          <h2 class="section">Programs</h2>
+          <ul id="programs"></ul>
+        </div>
+        <div id="skills-block">
+          <h2 class="section">Skills</h2>
+          <ul id="skills"></ul>
+        </div>
+      </div>
+
+      <!-- Folders the agent may use. -->
+      <div id="panel-folders" class="panel" role="tabpanel" aria-labelledby="tab-folders" hidden>
+        <p id="no-folders" class="muted" hidden>None yet. Add a folder this agent may find and read files in — and, if you let it, write. Only the folders you add here are reachable; nothing else on this Mac is.</p>
+        <ul id="folders"></ul>
+        <div id="folder-add-row" class="row">
+          <button id="folder-add" type="button" class="primary">Add a folder…</button>
+        </div>
+        <form id="folder-form" class="card" hidden>
+          <div id="folder-path" class="where"></div>
+          <label for="folder-name">Name</label>
+          <input id="folder-name" type="text" maxlength="60" autocomplete="off" spellcheck="false">
+          <label>Permission</label>
+          <div class="row">
+            <label class="inline"><input type="radio" name="folder-mode" value="read" checked> Read only</label>
+            <label class="inline"><input type="radio" name="folder-mode" value="write"> Read and write</label>
+          </div>
+          <label for="folder-description">What it holds (optional)</label>
+          <input id="folder-description" type="text" maxlength="1000" autocomplete="off">
+          <div class="row actions">
+            <button id="folder-save" type="submit" class="primary">Add</button>
+            <button id="folder-cancel" type="button">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Settings: what the agent may do here, the app, the pairing. -->
+      <div id="panel-settings" class="panel" role="tabpanel" aria-labelledby="tab-settings" hidden>
+        <h2 class="section">What Wysebee may do on this Mac</h2>
+        <div class="card list">
+          <label class="setting" id="row-run">
+            <span class="text">
+              <span class="name">Run programs on this Mac</span>
+              <span class="muted">The programs and skills you allow. Off pauses everything below too.</span>
+            </span>
+            <input id="run-switch" type="checkbox" role="switch" class="toggle">
+          </label>
+
+          <!-- Run any program (2026-11-16): the AI names the program; off by default. -->
+          <label class="setting power" id="row-any">
+            <span class="text">
+              <span class="name">Run any program</span>
+              <span class="muted">An agent given "Run any program" may run any program it names, with your rights — never through a shell; dangerous ones are refused.</span>
+            </span>
+            <input id="any-switch" type="checkbox" role="switch" class="toggle">
+          </label>
+          <div id="any-confirm" class="confirm" hidden>
+            <p>Let Wysebee run any program it chooses on this Mac, as you, without asking first? Only turn this on for an agent you trust with this Mac.</p>
+            <div class="row"><button id="any-on" type="button" class="danger-solid">Turn on</button><button id="any-cancel" type="button">Cancel</button></div>
+          </div>
+
+          <!-- Screen control (2026-11-16): screenshots, the mouse and the keyboard; off by default. -->
+          <label class="setting power" id="row-screen">
+            <span class="text">
+              <span class="name">See and control the screen</span>
+              <span class="muted">Screenshots, the mouse and the keyboard; a red ring shows where it clicks. macOS asks you to allow Screen Recording and Accessibility.</span>
+            </span>
+            <input id="screen-switch" type="checkbox" role="switch" class="toggle">
+          </label>
+          <div id="screen-confirm" class="confirm" hidden>
+            <p>Let Wysebee see this screen and use the mouse and keyboard, as you? It can then do anything you could do here, including in other apps. Only turn this on while you want it to.</p>
+            <div class="row"><button id="screen-on" type="button" class="danger-solid">Turn on</button><button id="screen-cancel" type="button">Cancel</button></div>
+          </div>
+
+          <!-- Developer access and the Android toolkit (2026-11-16): off by default. -->
+          <label class="setting power" id="row-dev">
+            <span class="text">
+              <span class="name">Work as a developer</span>
+              <span class="muted">zsh and bash commands (Homebrew's tools too), and files anywhere on this Mac, as you — like a coding assistant running here. Builds can run in the background.</span>
+            </span>
+            <input id="dev-switch" type="checkbox" role="switch" class="toggle">
+          </label>
+          <div id="dev-confirm" class="confirm" hidden>
+            <p>Let Wysebee run any command and change any file on this Mac, as you, without asking first? It can do anything you can do in a terminal. Only turn this on for an agent you trust with this Mac, while you want it.</p>
+            <div class="row"><button id="dev-on" type="button" class="danger-solid">Turn on</button><button id="dev-cancel" type="button">Cancel</button></div>
+          </div>
+
+          <label class="setting power" id="row-android">
+            <span class="text">
+              <span class="name">Use Android phones</span>
+              <span class="muted">The phones and emulators adb sees here: screenshots, logcat, taps and typing, installing apps, adb shell — never root or the bootloader.</span>
+            </span>
+            <input id="android-switch" type="checkbox" role="switch" class="toggle">
+          </label>
+          <div id="android-confirm" class="confirm" hidden>
+            <p>Let Wysebee use the Android phones plugged into this Mac through adb — tap, type, install and uninstall apps and run adb shell commands — without asking first?</p>
+            <div class="row"><button id="android-on" type="button" class="danger-solid">Turn on</button><button id="android-cancel" type="button">Cancel</button></div>
+          </div>
+
+          <!-- The iPhone toolkit (2026-11-17): simulators and paired iPhones through Xcode; off by default. -->
+          <label class="setting power" id="row-ios">
+            <span class="text">
+              <span class="name">Use iPhones and simulators</span>
+              <span class="muted">Through Xcode: boot simulators, screenshots and logs, install, launch and remove apps — on simulators and on iPhones paired with this Mac.</span>
+            </span>
+            <input id="ios-switch" type="checkbox" role="switch" class="toggle">
+          </label>
+          <div id="ios-confirm" class="confirm" hidden>
+            <p>Let Wysebee use this Mac's iOS simulators and the iPhones paired with it — boot and shut down simulators, install, launch and uninstall apps — without asking first?</p>
+            <div class="row"><button id="ios-on" type="button" class="danger-solid">Turn on</button><button id="ios-cancel" type="button">Cancel</button></div>
+          </div>
+        </div>
+
+        <h2 class="section">App</h2>
+        <div class="card list">
+          <label class="setting">
+            <span class="text">
+              <span class="name">Start at login</span>
+              <span class="muted">Wysebee Agent starts in the menu bar when you log in to your Mac.</span>
+            </span>
+            <input id="autostart" type="checkbox" role="switch" class="toggle">
+          </label>
+          <div class="setting">
+            <span class="text">
+              <span class="name">Appearance</span>
+              <span class="muted">The window's colours.</span>
+            </span>
+            <div class="segmented" role="radiogroup" aria-label="Appearance">
+              <button type="button" role="radio" data-theme-choice="system">System</button>
+              <button type="button" role="radio" data-theme-choice="light">Light</button>
+              <button type="button" role="radio" data-theme-choice="dark">Dark</button>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="section">Pairing</h2>
+        <div class="card">
+          <div id="unpair-row" class="row spread">
+            <span class="muted">Unpair this Mac from its agent in Wysebee.</span>
+            <button id="unpair" type="button" class="danger">Unpair…</button>
+          </div>
+          <div id="unpair-confirm" hidden>
+            <p>Unpair this Mac? Its agent stays in Wysebee, without this Mac, and what you allowed here — the folders you picked too — is forgotten.</p>
+            <div class="row">
+              <button id="unpair-yes" type="button" class="danger-solid">Unpair</button>
+              <button id="unpair-no" type="button">Keep it paired</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- No way to change Wysebee Cloud's address here: a release talks to app.wysebee.com;
+       development sets WYSEBEE_CLOUD_URL (scripts/run_dev.sh). -->
+  <footer><p id="version" class="muted"></p></footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
