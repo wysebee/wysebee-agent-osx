@@ -164,9 +164,10 @@ this section is what the script does by hand.
 WYSEBEE_CLOUD_URL=https://cloud.example.com cargo run -p agent-app
 ```
 
-The window has no way to change the address: a release talks to Wysebee Cloud
-(`https://app.wysebee.com`), development sets the variable. Then pair as above, typing the
-code in a Wysebee that talks to the same cloud.
+Or, while unpaired, enter the address in the window's **Server** tab (https, or http to
+this computer); the saved address wins over the variable, which is only the default ("Use the default" goes
+back to it, else to `https://app.wysebee.com`). Then pair as above, typing the code in a Wysebee that talks to the
+same cloud.
 
 To keep a development copy apart from an installed one, move its state folder:
 
