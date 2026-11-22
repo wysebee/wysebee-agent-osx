@@ -53,7 +53,7 @@ mkdir -p "$STATE_DIR"
 export WYSEBEE_CLOUD_URL="$URL"
 export WYSEBEE_AGENT_STATE_DIR="$STATE_DIR"
 
-echo "Cloud:  $WYSEBEE_CLOUD_URL"
+echo "Cloud:  $WYSEBEE_CLOUD_URL (the default; an address saved in the Server tab wins)"
 echo "State:  $WYSEBEE_AGENT_STATE_DIR"
 
 cd "$REPO_ROOT"
